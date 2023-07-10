@@ -65,7 +65,7 @@ class Counting(commands.Cog):
                 last_counter = await guild_data.last_counter()
                 if number != current_count + 1:
                     await message.delete()
-                    embed = discord.Embed(title="Counting Game", description=f"You got the count wrong! Expected count: {current_count + 1}", color=0x2b2d31)
+                    embed = discord.Embed(title="Counting Game", description=f"You got the count wrong dummy! Expected count: {current_count + 1}", color=0x2b2d31)
                     embed.set_image(url="https://media.tenor.com/4BRzlmo2FroAAAAC/kendeshi-anime-smh.gif")  # Replace with the actual image URL
                     response = await message.channel.send(embed=embed)
                     await response.delete(delay=30)  # Autodelete after 5 seconds
@@ -80,6 +80,6 @@ class Counting(commands.Cog):
                     board = await guild_data.count_board()
                     board[message.author.id] = board.get(message.author.id, 0) + 1
                     await guild_data.count_board.set(board)
-                    await message.delete()
+                    # await message.delete()
             except ValueError:
                 pass
