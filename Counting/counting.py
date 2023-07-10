@@ -28,22 +28,22 @@ class Counting(commands.Cog):
         await self.config.guild(ctx.guild).counting_channel.set(None)
         await ctx.send("Counting channel has been reset.")
 
-    @commands.command()
-    async def countboard(self, ctx):
-        board = await self.config.guild(ctx.guild).count_board()
-        if not board:
-            await ctx.send("No one has counted yet.")
-            return
-        leaderboard = sorted(board.items(), key=lambda x: x[1], reverse=True)
-        leaderboard_str = []
-        for user_id, count in leaderboard:
-            user = ctx.guild.get_member(user_id)
-            if user:
-                leaderboard_str.append(f"{user.display_name}: {count}")
-        if leaderboard_str:
-            await ctx.send("\n".join(leaderboard_str))
-        else:
-            await ctx.send("No one has counted yet.")
+    # @commands.command()
+    # async def countboard(self, ctx):
+    #     board = await self.config.guild(ctx.guild).count_board()
+    #     if not board:
+    #         await ctx.send("No one has counted yet.")
+    #         return
+    #     leaderboard = sorted(board.items(), key=lambda x: x[1], reverse=True)
+    #     leaderboard_str = []
+    #     for user_id, count in leaderboard:
+    #         user = ctx.guild.get_member(user_id)
+    #         if user:
+    #             leaderboard_str.append(f"{user.display_name}: {count}")
+    #     if leaderboard_str:
+    #         await ctx.send("\n".join(leaderboard_str))
+    #     else:
+    #         await ctx.send("No one has counted yet.")
 
     @commands.command()
     async def countrules(self, ctx):
