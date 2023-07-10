@@ -3,7 +3,7 @@
       "fakesmile"
     ],
     "description": "Counting is a configurable counting game.",
-    "install_msg": "Thanks for installing Counting cog. Do `[p]help Counting` for more information",
+    "install_msg": "Thanks for installing Counting cog. Do `[p]help counting` for more information",
     "short": "Let the count start.",
     "min_python_version": [
       3,
