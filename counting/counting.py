@@ -68,4 +68,4 @@ class Counting(commands.Cog):
                     await message.add_reaction("✅")
                     
             except ValueError:
-                pass
+                await message.delete()
