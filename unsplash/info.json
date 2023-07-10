@@ -1,0 +1,19 @@
+{
+    "author": [
+      "fakesmile"
+    ],
+    "description": "A cog to get images from Unsplash.",
+    "install_msg": "Thanks for installing Counting cog. Do `[p]help unsplash` for more information. Make sure to set your api using `[p]set api unsplash access_key,[ACCESS_KEY]` .",
+    "short": "search for any images from Unsplash.",
+    "min_python_version": [
+      3,
+      9,
+      1
+    ],
+    "requirements": ["unsplashapi"],
+    "tags": [
+      "unsplash, images"
+    ],
+    "type": "COG",
+    "end_user_data_statement": "This cog does not persistently store data or metadata about users."
+  }
