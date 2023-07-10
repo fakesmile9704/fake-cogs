@@ -28,23 +28,6 @@ class Counting(commands.Cog):
         await self.config.guild(ctx.guild).counting_channel.set(None)
         await ctx.send("Counting channel has been reset.")
 
-    # @commands.command()
-    # async def countboard(self, ctx):
-    #     board = await self.config.guild(ctx.guild).count_board()
-    #     if not board:
-    #         await ctx.send("No one has counted yet.")
-    #         return
-    #     leaderboard = sorted(board.items(), key=lambda x: x[1], reverse=True)
-    #     leaderboard_str = []
-    #     for user_id, count in leaderboard:
-    #         user = ctx.guild.get_member(user_id)
-    #         if user:
-    #             leaderboard_str.append(f"{user.display_name}: {count}")
-    #     if leaderboard_str:
-    #         await ctx.send("\n".join(leaderboard_str))
-    #     else:
-    #         await ctx.send("No one has counted yet.")
-
     @commands.command()
     async def countrules(self, ctx):
         rules = ("1: A person can't count twice in a row\n"
@@ -66,21 +49,22 @@ class Counting(commands.Cog):
                 if number != current_count + 1:
                     await message.delete()
                     embed = discord.Embed(title="Counting Game", description=f"You got the count wrong dummy! Expected count: {current_count + 1}", color=0x2b2d31)
-                    embed.set_image(url="https://media.tenor.com/4BRzlmo2FroAAAAC/kendeshi-anime-smh.gif")  # Replace with the actual image URL
+                    embed.set_image(url="https://media.tenor.com/4BRzlmo2FroAAAAC/kendeshi-anime-smh.gif")
                     response = await message.channel.send(embed=embed)
-                    await response.delete(delay=5)  # Autodelete after 5 seconds
+                    await response.delete(delay=5)
                 elif message.author.id == last_counter:
                     await message.delete()
                     embed2 = discord.Embed(title="Counting Game", description="You can't count twice!", color=0x2b2d31)
                     embed2.set_image(url="https://i.pinimg.com/originals/63/c0/c6/63c0c6b632dfffd790b60a87007f1bfd.gif")
                     response = await message.channel.send(embed=embed2)
-                    await response.delete(delay=5)  # Autodelete after 5 seconds
+                    await response.delete(delay=5)
                 else:
                     await guild_data.current_count.set(number)
                     await guild_data.last_counter.set(message.author.id)
                     board = await guild_data.count_board()
                     board[message.author.id] = board.get(message.author.id, 0) + 1
                     await guild_data.count_board.set(board)
-                    # await message.delete()
+                    await message.add_reaction("✅")
+                    
             except ValueError:
                 pass
