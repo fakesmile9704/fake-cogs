@@ -72,6 +72,6 @@ class Counting(commands.Cog):
                     board = await guild_data.count_board()
                     board[message.author.id] = board.get(message.author.id, 0) + 1
                     await guild_data.count_board.set(board)
-                    await message.delete()
+                    # await message.delete()
             except ValueError:
                 pass
