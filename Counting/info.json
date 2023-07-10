@@ -1,0 +1,19 @@
+{
+    "author": [
+      "fakesmile"
+    ],
+    "description": "Counting is a configurable counting game.",
+    "install_msg": "Thanks for installing Counting cog. Do `[p]help Counting` for more information",
+    "short": "Let the count start.",
+    "min_python_version": [
+      3,
+      9,
+      1
+    ],
+    "requirements": [],
+    "tags": [
+      "counting"
+    ],
+    "type": "COG",
+    "end_user_data_statement": "This cog does not persistently store data or metadata about users."
+  }
