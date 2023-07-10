@@ -3,7 +3,7 @@
       "fakesmile"
     ],
     "description": "A cog to get images from Unsplash.",
-    "install_msg": "Thanks for installing Counting cog. Do `[p]help unsplash` for more information. Make sure to set your api using `[p]set api unsplash access_key,[ACCESS_KEY]` .",
+    "install_msg": "Thanks for installing unsplash cog. Do `[p]help unsplash` for more information. Make sure to set your api using `[p]set api unsplash access_key,[ACCESS_KEY]` .",
     "short": "search for any images from Unsplash.",
     "min_python_version": [
       3,
