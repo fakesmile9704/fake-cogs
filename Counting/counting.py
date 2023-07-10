@@ -35,7 +35,15 @@ class Counting(commands.Cog):
             await ctx.send("No one has counted yet.")
             return
         leaderboard = sorted(board.items(), key=lambda x: x[1], reverse=True)
-        await ctx.send("\n".join([f"{self.bot.get_user(user_id)}: {count}" for user_id, count in leaderboard]))
+        leaderboard_str = []
+        for user_id, count in leaderboard:
+            user = ctx.guild.get_member(user_id)
+            if user:
+                leaderboard_str.append(f"{user.display_name}: {count}")
+        if leaderboard_str:
+            await ctx.send("\n".join(leaderboard_str))
+        else:
+            await ctx.send("No one has counted yet.")
 
     @commands.command()
     async def countrules(self, ctx):
@@ -57,13 +65,13 @@ class Counting(commands.Cog):
                 last_counter = await guild_data.last_counter()
                 if number != current_count + 1:
                     await message.delete()
-                    embed = discord.Embed(title="Counting Game", description="You got the count wrong! Expected count: {current_count + 1}", color=discord.Color.red())
+                    embed = discord.Embed(title="Counting Game", description=f"You got the count wrong! Expected count: {current_count + 1}", color=0x2b2d31)
                     embed.set_image(url="https://media.tenor.com/4BRzlmo2FroAAAAC/kendeshi-anime-smh.gif")  # Replace with the actual image URL
                     response = await message.channel.send(embed=embed)
                     await response.delete(delay=30)  # Autodelete after 5 seconds
                 elif message.author.id == last_counter:
                     await message.delete()
-                    embed2 = discord.Embed(title="Counting Game", description="You can't count twice!", color=discord.Color.red())
+                    embed2 = discord.Embed(title="Counting Game", description="You can't count twice!", color=0x2b2d31)
                     response = await message.channel.send(embed=embed2)
                     await response.delete(delay=30)  # Autodelete after 5 seconds
                 else:
@@ -72,6 +80,6 @@ class Counting(commands.Cog):
                     board = await guild_data.count_board()
                     board[message.author.id] = board.get(message.author.id, 0) + 1
                     await guild_data.count_board.set(board)
-                    # await message.delete()
+                    await message.delete()
             except ValueError:
                 pass
