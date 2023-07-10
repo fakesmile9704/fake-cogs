@@ -68,12 +68,13 @@ class Counting(commands.Cog):
                     embed = discord.Embed(title="Counting Game", description=f"You got the count wrong dummy! Expected count: {current_count + 1}", color=0x2b2d31)
                     embed.set_image(url="https://media.tenor.com/4BRzlmo2FroAAAAC/kendeshi-anime-smh.gif")  # Replace with the actual image URL
                     response = await message.channel.send(embed=embed)
-                    await response.delete(delay=30)  # Autodelete after 5 seconds
+                    await response.delete(delay=5)  # Autodelete after 5 seconds
                 elif message.author.id == last_counter:
                     await message.delete()
                     embed2 = discord.Embed(title="Counting Game", description="You can't count twice!", color=0x2b2d31)
+                    embed2.set_image(url="https://i.pinimg.com/originals/63/c0/c6/63c0c6b632dfffd790b60a87007f1bfd.gif")
                     response = await message.channel.send(embed=embed2)
-                    await response.delete(delay=30)  # Autodelete after 5 seconds
+                    await response.delete(delay=5)  # Autodelete after 5 seconds
                 else:
                     await guild_data.current_count.set(number)
                     await guild_data.last_counter.set(message.author.id)
