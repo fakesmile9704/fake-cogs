@@ -33,7 +33,7 @@ class WordGame(commands.Cog):
         embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n{jumbled_word}", color=0x2b2d31)
         await channel.send(embed=embed)
 
-    @commands.Cog.event
+    @commands.Cog.listener()
     async def on_message_without_command(self, message):
         if message.author.bot:
             return
