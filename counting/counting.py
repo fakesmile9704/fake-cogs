@@ -47,14 +47,20 @@ class Counting(commands.Cog):
                 current_count = await guild_data.current_count()
                 last_counter = await guild_data.last_counter()
                 if number != current_count + 1:
-                    await message.delete()
+                    try:	
+                        await message.delete()	
+                    except discord.Forbidden:	
+                        await message.channel.send("I don't have permission to delete messages. Please make sure I have the 'Manage Messages' permission.")
                     await guild_data.current_count.set(0)
                     embed = discord.Embed(title="Counting Game", description=f"You got the count wrong dummy! Counting restarted from 1", color=0x2b2d31)
                     embed.set_image(url="https://media.tenor.com/4BRzlmo2FroAAAAC/kendeshi-anime-smh.gif")
                     response = await message.channel.send(embed=embed)
                     await response.delete(delay=5)
                 elif message.author.id == last_counter:
-                    await message.delete()
+                    try:	
+                        await message.delete()	
+                    except discord.Forbidden:	
+                        await message.channel.send("I don't have permission to delete messages. Please make sure I have the 'Manage Messages' permission.")
                     embed2 = discord.Embed(title="Counting Game", description="You can't count twice!", color=0x2b2d31)
                     embed2.set_image(url="https://i.pinimg.com/originals/63/c0/c6/63c0c6b632dfffd790b60a87007f1bfd.gif")
                     response = await message.channel.send(embed=embed2)
