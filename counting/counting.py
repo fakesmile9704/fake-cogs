@@ -56,7 +56,6 @@ class Counting(commands.Cog):
                     embed = discord.Embed(title="Counting Game", description=f"You got the count wrong dummy! Counting restarted from 1", color=0x2b2d31)
                     embed.set_image(url="https://media.tenor.com/4BRzlmo2FroAAAAC/kendeshi-anime-smh.gif")
                     response = await message.channel.send(embed=embed)
-                    await response.delete(delay=5)
                 elif message.author.id == last_counter:
                     try:	
                         await message.delete()	
