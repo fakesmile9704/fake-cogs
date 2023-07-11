@@ -13,7 +13,8 @@ class WordGame(commands.Cog):
             "last_word": ""
         }
         self.config.register_guild(**default_guild)
-
+        
+    @commands.mod_or_can_manage_channel()
     @commands.command()
     async def setgamechannel(self, ctx, channel: discord.TextChannel):
         await self.config.guild(ctx.guild).game_channel.set(channel.id)

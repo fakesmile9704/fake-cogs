@@ -13,6 +13,7 @@ class Counting(commands.Cog):
         }
         self.config.register_guild(**default_guild)
 
+    @commands.mod_or_can_manage_channel()
     @commands.command()
     async def setcounting(self, ctx, channel: discord.TextChannel):
         await self.config.guild(ctx.guild).counting_channel.set(channel.id)
@@ -23,6 +24,7 @@ class Counting(commands.Cog):
         count = await self.config.guild(ctx.guild).current_count()
         await ctx.send(f"The current count is {count}")
 
+    @commands.mod_or_can_manage_channel()
     @commands.command()
     async def resetcountchannel(self, ctx):
         await self.config.guild(ctx.guild).counting_channel.set(None)
