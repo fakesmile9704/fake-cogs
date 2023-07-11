@@ -7,7 +7,7 @@ import random
 class WordGame(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=1234567890)
+        self.config = Config.get_conf(self, identifier=927537080882561025)
         default_guild = {
             "game_channel": None,
             "last_word": ""
@@ -21,7 +21,7 @@ class WordGame(commands.Cog):
         await self.send_first_word(channel)
 
     async def send_first_word(self, channel):
-        word_list = self.load_word_list()  # Load word list from word.json
+        word_list = self.load_word_list()
         if not word_list:
             await channel.send("Word list is empty.")
             return
@@ -53,7 +53,7 @@ class WordGame(commands.Cog):
             await message.add_reaction("❌")
 
     async def send_next_word(self, channel):
-        word_list = self.load_word_list()  # Load word list from word.json
+        word_list = self.load_word_list()
         if not word_list:
             await channel.send("Word list is empty.")
             return
