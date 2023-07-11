@@ -37,7 +37,7 @@ class WordGame(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return
-        if message.content.startswith(self.bot.command_prefix):
+        if not message.content.startswith(await self.bot.get_prefix(message)):
             return
 
         game_channel_id = await self.config.guild(message.guild).game_channel()
