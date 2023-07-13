@@ -9,6 +9,7 @@ class Unsplash(commands.Cog):
 
     @commands.hybrid_command()
     async def uimage(self, ctx, *, query: str):
+        """Get images from unsplash with a given query."""
         api_tokens = await ctx.bot.get_shared_api_tokens(service_name="unsplash")
         access_key = api_tokens.get("access_key")
 

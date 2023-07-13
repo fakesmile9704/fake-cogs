@@ -14,24 +14,28 @@ class Counting(commands.Cog):
         self.config.register_guild(**default_guild)
 
     @commands.mod_or_can_manage_channel()
-    @commands.command()
+    @commands.hybrid_command()
     async def setcounting(self, ctx, channel: discord.TextChannel):
+        """Set a counting channel for the game to began!"""
         await self.config.guild(ctx.guild).counting_channel.set(channel.id)
         await ctx.send(f"Counting channel has been set to {channel.mention}")
 
-    @commands.command()
+    @commands.hybrid_command()
     async def currentcount(self, ctx):
+        """Display the current count"""
         count = await self.config.guild(ctx.guild).current_count()
         await ctx.send(f"The current count is {count}")
 
     @commands.mod_or_can_manage_channel()
-    @commands.command()
+    @commands.hybrid_command()
     async def resetcountchannel(self, ctx):
+        """Reset the counting!"""
         await self.config.guild(ctx.guild).counting_channel.set(None)
         await ctx.send("Counting channel has been reset.")
 
-    @commands.command()
+    @commands.hybrid_command()
     async def countrules(self, ctx):
+        """Display the rules for counting."""
         rules = ("1: A person can't count twice in a row\n"
                  "2: The user for each number should alternate\n"
                  "3: If a number is counted wrong the count will reset")

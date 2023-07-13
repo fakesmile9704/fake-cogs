@@ -16,7 +16,7 @@ class WordGame(commands.Cog):
         self.word_list = self.load_word_list()
         
     @commands.mod_or_can_manage_channel()
-    @commands.command()
+    @commands.hybrid_command()
     async def setwordchannel(self, ctx, channel: discord.TextChannel):
         """Set the word game channel."""
         await self.config.guild(ctx.guild).game_channel.set(channel.id)
@@ -54,7 +54,7 @@ class WordGame(commands.Cog):
         else:
             await message.add_reaction("❌")
 
-    @commands.command()
+    @commands.hybrid_command()
     async def skipword(self, ctx):
         """Skip a word if you are stuck."""
         game_channel_id = await self.config.guild(ctx.guild).game_channel()
