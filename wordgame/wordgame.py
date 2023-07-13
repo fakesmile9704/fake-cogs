@@ -32,7 +32,7 @@ class WordGame(commands.Cog):
         jumbled_word = self.jumble_word(word)
         await self.config.guild(channel.guild).last_word.set(word)
 
-        embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n{jumbled_word}", color=0x2b2d31)
+        embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n**{jumbled_word}**", color=0x2b2d31)
         await channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -72,7 +72,7 @@ class WordGame(commands.Cog):
         jumbled_word = self.jumble_word(word)
         await self.config.guild(channel.guild).last_word.set(word)
 
-        embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n{jumbled_word}", color=0x2b2d31)
+        embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n**{jumbled_word}**", color=0x2b2d31)
         await channel.send(embed=embed)
 
     def load_word_list(self):
