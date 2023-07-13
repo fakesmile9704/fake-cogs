@@ -13,21 +13,22 @@ class WordGame(commands.Cog):
             "last_word": ""
         }
         self.config.register_guild(**default_guild)
+        self.word_list = self.load_word_list()
         
     @commands.mod_or_can_manage_channel()
     @commands.command()
-    async def setgamechannel(self, ctx, channel: discord.TextChannel):
+    async def setwordchannel(self, ctx, channel: discord.TextChannel):
+        """Set the word game channel."""
         await self.config.guild(ctx.guild).game_channel.set(channel.id)
         await ctx.send(f"Game channel has been set to {channel.mention}")
         await self.send_first_word(channel)
 
     async def send_first_word(self, channel):
-        word_list = self.load_word_list()
-        if not word_list:
+        if not self.word_list:
             await channel.send("Word list is empty.")
             return
 
-        word = self.get_random_word(word_list)
+        word = self.get_random_word()
         jumbled_word = self.jumble_word(word)
         await self.config.guild(channel.guild).last_word.set(word)
 
@@ -53,13 +54,21 @@ class WordGame(commands.Cog):
         else:
             await message.add_reaction("❌")
 
+    @commands.command()
+    async def skipword(self, ctx):
+        """Skip a word if you are stuck."""
+        game_channel_id = await self.config.guild(ctx.guild).game_channel()
+        if ctx.channel.id != game_channel_id:
+            return
+
+        await self.send_next_word(ctx.channel)
+
     async def send_next_word(self, channel):
-        word_list = self.load_word_list()
-        if not word_list:
+        if not self.word_list:
             await channel.send("Word list is empty.")
             return
 
-        word = self.get_random_word(word_list)
+        word = self.get_random_word()
         jumbled_word = self.jumble_word(word)
         await self.config.guild(channel.guild).last_word.set(word)
 
@@ -75,8 +84,8 @@ class WordGame(commands.Cog):
         except (FileNotFoundError, json.JSONDecodeError):
             return []
 
-    def get_random_word(self, word_list):
-        return random.choice(word_list)
+    def get_random_word(self):
+        return random.choice(self.word_list)
 
     def jumble_word(self, word):
         word_chars = list(word)

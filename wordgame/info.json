@@ -2,8 +2,8 @@
     "author": [
       "fakesmile"
     ],
-    "description": "A fun word list game cog for your redbot. Try your best to guess the words as they jumbled all the characters within the word",
-    "install_msg": "Thanks for installing Wordgame cog. Do `[p]help wordgame` for more information.",
+    "description": "A fun word puzzle game cog for your redbot. Try your best to guess the words as they jumbled all the characters within the word",
+    "install_msg": "Thanks for installing Wordgame cog. Do `[p]help WordGame` for more information.",
     "short": "Have a fun word game with your friends in your server.",
     "min_python_version": [
       3,
