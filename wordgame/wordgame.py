@@ -13,7 +13,7 @@ class WordGame(commands.Cog):
             "last_word": ""
         }
         self.config.register_guild(**default_guild)
-        
+
     @commands.mod_or_can_manage_channel()
     @commands.command()
     async def setgamechannel(self, ctx, channel: discord.TextChannel):
@@ -30,10 +30,8 @@ class WordGame(commands.Cog):
         word = self.get_random_word(word_list)
         jumbled_word = self.jumble_word(word)
         await self.config.guild(channel.guild).last_word.set(word)
-
+        view = SkipWord()
         embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n{jumbled_word}", color=0x2b2d31)
-        skip_button = discord.ui.Button(style=discord.ButtonStyle.danger, label="Skip", custom_id="skip_word")
-        view = SkipButtonView(skip_button)
         await channel.send(embed=embed, view=view)
 
     @commands.Cog.listener()
@@ -72,8 +70,7 @@ class WordGame(commands.Cog):
         await self.config.guild(channel.guild).last_word.set(word)
 
         embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n{jumbled_word}", color=0x2b2d31)
-        skip_button = discord.ui.Button(style=discord.ButtonStyle.danger, label="Skip", custom_id="skip_word")
-        view = SkipButtonView(skip_button)
+        view = SkipWord()
         await channel.send(embed=embed, view=view)
 
     def load_word_list(self):
@@ -94,18 +91,22 @@ class WordGame(commands.Cog):
         return ''.join(word_chars)
 
 
-class SkipButtonView(discord.ui.View):
-    def __init__(self, button):
-        super().__init__()
-        self.add_item(button)
+class SkipWord(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+        self.add_item(SkipButtonView())
 
-    async def on_timeout(self):
+    async def invoke_skip_word(self, interaction):
         self.stop()
+        ctx = await self.bot.get_context(interaction.message)
+        await ctx.invoke(self.bot.get_command("skipword"))
 
+class SkipButtonView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
 
     @discord.ui.button(label="Skip", style=discord.ButtonStyle.danger, custom_id="skip_word")
     async def skip_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
         await self.invoke_skip_word(interaction)
 
     async def invoke_skip_word(self, interaction):
