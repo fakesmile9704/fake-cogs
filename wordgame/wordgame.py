@@ -7,13 +7,14 @@ import random
 class WordGame(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=1234567890)
+        self.config = Config.get_conf(self, identifier=927537080882561025)
         default_guild = {
             "game_channel": None,
             "last_word": ""
         }
         self.config.register_guild(**default_guild)
-
+        
+    @commands.mod_or_can_manage_channel()
     @commands.command()
     async def setgamechannel(self, ctx, channel: discord.TextChannel):
         await self.config.guild(ctx.guild).game_channel.set(channel.id)
@@ -21,7 +22,7 @@ class WordGame(commands.Cog):
         await self.send_first_word(channel)
 
     async def send_first_word(self, channel):
-        word_list = self.load_word_list()  # Load word list from word.json
+        word_list = self.load_word_list()
         if not word_list:
             await channel.send("Word list is empty.")
             return
@@ -31,7 +32,9 @@ class WordGame(commands.Cog):
         await self.config.guild(channel.guild).last_word.set(word)
 
         embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n{jumbled_word}", color=0x2b2d31)
-        await channel.send(embed=embed)
+        skip_button = discord.ui.Button(style=discord.ButtonStyle.danger, label="Skip", custom_id="skip_word")
+        view = SkipButtonView(skip_button)
+        await channel.send(embed=embed, view=view)
 
     @commands.Cog.listener()
     async def on_message_without_command(self, message):
@@ -52,8 +55,14 @@ class WordGame(commands.Cog):
         else:
             await message.add_reaction("❌")
 
+    @commands.Cog.listener()
+    async def on_button_click(self, interaction):
+        if interaction.component.custom_id == "skip_word":
+            await interaction.respond(type=discord.InteractionType.ChannelMessageWithSource)
+            await self.send_next_word(interaction.channel)
+
     async def send_next_word(self, channel):
-        word_list = self.load_word_list()  # Load word list from word.json
+        word_list = self.load_word_list()
         if not word_list:
             await channel.send("Word list is empty.")
             return
@@ -63,7 +72,9 @@ class WordGame(commands.Cog):
         await self.config.guild(channel.guild).last_word.set(word)
 
         embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n{jumbled_word}", color=0x2b2d31)
-        await channel.send(embed=embed)
+        skip_button = discord.ui.Button(style=discord.ButtonStyle.danger, label="Skip", custom_id="skip_word")
+        view = SkipButtonView(skip_button)
+        await channel.send(embed=embed, view=view)
 
     def load_word_list(self):
         word_file = bundled_data_path(self) / "word.json"
@@ -81,3 +92,23 @@ class WordGame(commands.Cog):
         word_chars = list(word)
         random.shuffle(word_chars)
         return ''.join(word_chars)
+
+
+class SkipButtonView(discord.ui.View):
+    def __init__(self, button):
+        super().__init__()
+        self.add_item(button)
+
+    async def on_timeout(self):
+        self.stop()
+
+
+    @discord.ui.button(label="Skip", style=discord.ButtonStyle.danger, custom_id="skip_word")
+    async def skip_button(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        await self.invoke_skip_word(interaction)
+
+    async def invoke_skip_word(self, interaction):
+        self.stop()
+        ctx = await self.bot.get_context(interaction.message)
+        await ctx.invoke(self.bot.get_command("skipword"))
