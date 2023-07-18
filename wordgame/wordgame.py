@@ -7,6 +7,8 @@ import random
 class WordGame(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.view = SkipView(self)
+        bot.add_view(self.view)
         self.config = Config.get_conf(self, identifier=927537080882561025)
         default_guild = {
             "game_channel": None,
@@ -14,11 +16,10 @@ class WordGame(commands.Cog):
         }
         self.config.register_guild(**default_guild)
         self.word_list = self.load_word_list()
-        
+
     @commands.mod_or_can_manage_channel()
     @commands.hybrid_command()
     async def setwordchannel(self, ctx, channel: discord.TextChannel):
-        """Set the word game channel."""
         await self.config.guild(ctx.guild).game_channel.set(channel.id)
         await ctx.send(f"Game channel has been set to {channel.mention}")
         await self.send_first_word(channel)
@@ -28,12 +29,13 @@ class WordGame(commands.Cog):
             await channel.send("Word list is empty.")
             return
 
-        word = self.get_random_word()
+        word = self.get_random_word(self.word_list)
         jumbled_word = self.jumble_word(word)
         await self.config.guild(channel.guild).last_word.set(word)
-
-        embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n**{jumbled_word}**", color=0x2b2d31)
-        await channel.send(embed=embed)
+        embed = discord.Embed(title="💬・Guess the word", description=f"Unscramble the word below:", color=0x2b2d31)
+        embed.set_author(name=self.bot.user.display_name ,icon_url=self.bot.user.display_avatar)
+        embed.add_field(name="🔀┆Word", value=f"**{jumbled_word}**", inline=False)
+        await channel.send(embed=embed, view=self.view)
 
     @commands.Cog.listener()
     async def on_message_without_command(self, message):
@@ -54,40 +56,51 @@ class WordGame(commands.Cog):
         else:
             await message.add_reaction("❌")
 
-    @commands.hybrid_command()
-    async def skipword(self, ctx):
-        """Skip a word if you are stuck."""
-        game_channel_id = await self.config.guild(ctx.guild).game_channel()
-        if ctx.channel.id != game_channel_id:
-            return
-
-        await self.send_next_word(ctx.channel)
-
-    async def send_next_word(self, channel):
+    async def send_next_word(self, channel, interaction):
         if not self.word_list:
             await channel.send("Word list is empty.")
             return
 
-        word = self.get_random_word()
+        word = self.get_random_word(self.word_list)
         jumbled_word = self.jumble_word(word)
         await self.config.guild(channel.guild).last_word.set(word)
+        await interaction.message.edit(view=None)
+        embed = discord.Embed(title="💬・Guess the word", description=f"Unscramble the word below:", color=0x2b2d31)
+        embed.set_author(name=self.bot.user.display_name ,icon_url=self.bot.user.display_avatar)
+        embed.add_field(name="🔀┆Word", value=f"**{jumbled_word}**", inline=False)
+        await channel.send(embed=embed, view=self.view)
 
-        embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n**{jumbled_word}**", color=0x2b2d31)
-        await channel.send(embed=embed)
 
     def load_word_list(self):
+        if hasattr(self, "word_list"):
+            return self.word_list
         word_file = bundled_data_path(self) / "word.json"
         try:
             with open(word_file) as file:
                 word_list = json.load(file)
+                self.word_list = word_list
                 return word_list
         except (FileNotFoundError, json.JSONDecodeError):
+            self.word_list = []
             return []
 
-    def get_random_word(self):
-        return random.choice(self.word_list)
+    def get_random_word(self, word_list):
+        return random.choice(word_list)
 
     def jumble_word(self, word):
         word_chars = list(word)
         random.shuffle(word_chars)
         return ''.join(word_chars)
+    
+class SkipView(discord.ui.View):
+    def __init__(self, cog):
+        super().__init__(timeout=None)
+        self.cog = cog
+
+    @discord.ui.button(label="Skip", style=discord.ButtonStyle.danger, custom_id="wordgame_skip")
+    async def skip(self, interaction, button):
+        await interaction.response.send_message("Skipped", ephemeral=True)
+        await self.cog.send_next_word(interaction.channel, interaction)
+
+    def cog_unload(self):
+      self.view.stop()
