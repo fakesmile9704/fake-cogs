@@ -1,8 +1,8 @@
 import discord
-from redbot.core import commands, Config
 import json
-from redbot.core.data_manager import bundled_data_path
 import random
+from redbot.core.data_manager import bundled_data_path
+from redbot.core import commands, Config
 
 class WordGame(commands.Cog):
     def __init__(self, bot):
@@ -30,7 +30,7 @@ class WordGame(commands.Cog):
         word = self.get_random_word(word_list)
         jumbled_word = self.jumble_word(word)
         await self.config.guild(channel.guild).last_word.set(word)
-        view = SkipWord()
+        view = SkipView()
         embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n{jumbled_word}", color=0x2b2d31)
         await channel.send(embed=embed, view=view)
 
@@ -70,7 +70,7 @@ class WordGame(commands.Cog):
         await self.config.guild(channel.guild).last_word.set(word)
 
         embed = discord.Embed(title="Word Game", description=f"Unscramble the word below:\n{jumbled_word}", color=0x2b2d31)
-        view = SkipWord()
+        view = SkipView()
         await channel.send(embed=embed, view=view)
 
     def load_word_list(self):
@@ -90,26 +90,13 @@ class WordGame(commands.Cog):
         random.shuffle(word_chars)
         return ''.join(word_chars)
 
-
-class SkipWord(discord.ui.View):
+class SkipView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
-        self.add_item(SkipButtonView())
-
-    async def invoke_skip_word(self, interaction):
-        self.stop()
-        ctx = await self.bot.get_context(interaction.message)
-        await ctx.invoke(self.bot.get_command("skipword"))
-
-class SkipButtonView(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @discord.ui.button(label="Skip", style=discord.ButtonStyle.danger, custom_id="skip_word")
-    async def skip_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await self.invoke_skip_word(interaction)
-
-    async def invoke_skip_word(self, interaction):
-        self.stop()
-        ctx = await self.bot.get_context(interaction.message)
-        await ctx.invoke(self.bot.get_command("skipword"))
+        
+        self.skip_button = discord.ui.Button(
+            label="Skip", 
+            style=discord.ButtonStyle.danger,
+            custom_id="skip_word"
+        )
+        self.add_item(self.skip_button)
