@@ -6,6 +6,7 @@ I enjoy coding and python is like a new language to me so I picked Red as my pra
 |----------------------------------------|:------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [Counting](https://github.com/fakesmile9704/fake-cogs/tree/master/Counting)       |   ✓    | <details><summary>A fun counting game in your server</summary> Set a coutning channel and start counting and have fun.</details> |
 | [Unsplash](https://github.com/fakesmile9704/fake-cogs/tree/master/unsplash)       |   ✓    | <details><summary>A cog to pull images from Unsplash</summary> With the use of unsplash api you can get any images with a query.</details> |
+| [WordGame](https://github.com/fakesmile9704/fake-cogs/tree/master/wordgame)       |   ✓    | <details><summary>A cog to play scramble word game</summary> A simple scramble wordgame channel with the support of skip a word command to skip when you are stuck for more infor do `[p]help WordGame`.</details> |
 # Installation
 
  - Run the following commands with your Red bot, replacing `[p]` with your prefix:
