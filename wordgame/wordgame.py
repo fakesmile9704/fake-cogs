@@ -1,8 +1,8 @@
 import discord
-import json
-import random
-from redbot.core.data_manager import bundled_data_path
 from redbot.core import commands, Config
+import json
+from redbot.core.data_manager import bundled_data_path
+import random
 
 class WordGame(commands.Cog):
     def __init__(self, bot):
@@ -56,7 +56,7 @@ class WordGame(commands.Cog):
     @commands.Cog.listener()
     async def on_button_click(self, interaction):
         if interaction.component.custom_id == "skip_word":
-            await interaction.respond(type=discord.InteractionType.ChannelMessageWithSource)
+            await interaction.response.send_message("Skipped", ephemeral=True)
             await self.send_next_word(interaction.channel)
 
     async def send_next_word(self, channel):
