@@ -13,6 +13,7 @@ class WordGame(commands.Cog):
             "last_word": ""
         }
         self.config.register_guild(**default_guild)
+        self.word_list = self.load_word_list()
 
     @commands.mod_or_can_manage_channel()
     @commands.command()
@@ -22,12 +23,12 @@ class WordGame(commands.Cog):
         await self.send_first_word(channel)
 
     async def send_first_word(self, channel):
-        word_list = self.load_word_list()
-        if not word_list:
+        # word_list = self.load_word_list()
+        if not self.word_list:
             await channel.send("Word list is empty.")
             return
 
-        word = self.get_random_word(word_list)
+        word = self.get_random_word(self.word_list)
         jumbled_word = self.jumble_word(word)
         await self.config.guild(channel.guild).last_word.set(word)
         embed = discord.Embed(title="💬・Guess the word", description=f"Unscramble the word below:", color=0x2b2d31)
@@ -53,14 +54,14 @@ class WordGame(commands.Cog):
             await self.send_next_word(message.channel)
         else:
             await message.add_reaction("❌")
-    @commands.Cog.listener()
+    # @commands.Cog.listener()
     async def send_next_word(self, channel):
-        word_list = self.load_word_list()
-        if not word_list:
+        # word_list = self.load_word_list()
+        if not self.word_list:
             await channel.send("Word list is empty.")
             return
 
-        word = self.get_random_word(word_list)
+        word = self.get_random_word(self.word_list)
         jumbled_word = self.jumble_word(word)
         await self.config.guild(channel.guild).last_word.set(word)
         embed = discord.Embed(title="💬・Guess the word", description=f"Unscramble the word below:", color=0x2b2d31)
@@ -70,12 +71,16 @@ class WordGame(commands.Cog):
 
 
     def load_word_list(self):
+        if hasattr(self, "word_list"):
+            return self.word_list
         word_file = bundled_data_path(self) / "word.json"
         try:
             with open(word_file) as file:
                 word_list = json.load(file)
+                self.word_list = word_list
                 return word_list
         except (FileNotFoundError, json.JSONDecodeError):
+            self.word_list = []
             return []
 
     def get_random_word(self, word_list):
@@ -88,7 +93,7 @@ class WordGame(commands.Cog):
     
 class SkipView(discord.ui.View):
     def __init__(self, cog):
-        super().__init__()
+        super().__init__(timeout=None)
         self.cog = cog
 
     @discord.ui.button(label="Skip", style=discord.ButtonStyle.danger)
