@@ -7,6 +7,8 @@ import random
 class WordGame(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.view = SkipView(self)
+        bot.add_view(self.view)
         self.config = Config.get_conf(self, identifier=927537080882561025)
         default_guild = {
             "game_channel": None,
@@ -23,7 +25,6 @@ class WordGame(commands.Cog):
         await self.send_first_word(channel)
 
     async def send_first_word(self, channel):
-        # word_list = self.load_word_list()
         if not self.word_list:
             await channel.send("Word list is empty.")
             return
@@ -34,7 +35,7 @@ class WordGame(commands.Cog):
         embed = discord.Embed(title="💬・Guess the word", description=f"Unscramble the word below:", color=0x2b2d31)
         embed.set_author(name=self.bot.user.display_name ,icon_url=self.bot.user.display_avatar)
         embed.add_field(name="🔀┆Word", value=f"**{jumbled_word}**", inline=False)
-        await channel.send(embed=embed, view=SkipView(self))
+        await channel.send(embed=embed, view=self.view)
 
     @commands.Cog.listener()
     async def on_message_without_command(self, message):
@@ -67,7 +68,7 @@ class WordGame(commands.Cog):
         embed = discord.Embed(title="💬・Guess the word", description=f"Unscramble the word below:", color=0x2b2d31)
         embed.set_author(name=self.bot.user.display_name ,icon_url=self.bot.user.display_avatar)
         embed.add_field(name="🔀┆Word", value=f"**{jumbled_word}**", inline=False)
-        await channel.send(embed=embed, view=SkipView(self))
+        await channel.send(embed=embed, view=self.view)
 
 
     def load_word_list(self):
@@ -96,7 +97,10 @@ class SkipView(discord.ui.View):
         super().__init__(timeout=None)
         self.cog = cog
 
-    @discord.ui.button(label="Skip", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="Skip", style=discord.ButtonStyle.danger, custom_id="wordgame_skip")
     async def skip(self, interaction, button):
         await interaction.response.send_message("Skipped", ephemeral=True)
         await self.cog.send_next_word(interaction.channel)
+
+    def cog_unload(self):
+      self.view.stop()
