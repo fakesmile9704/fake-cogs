@@ -1,84 +1,110 @@
-from redbot.core import commands, Config
+import random
+from redbot.core import commands
+from redbot.core.bot import Red
+from redbot.core.config import Config
 import discord
 
 class Counting(commands.Cog):
-    def __init__(self, bot):
+    """Cog for a counting game with leaderboards, custom reactions, per-guild configuration, and optional shame role."""
+
+    default_guild = {
+        "current_number": 0,
+        "channel_id": None,
+        "leaderboard": {},
+        "correct_emote": "✅",
+        "wrong_emote": "❌",
+        "shame_role": None,
+        "last_counter_id": None
+    }
+
+    def __init__(self, bot: Red):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=927537080882561025)
-        default_guild = {
-            "counting_channel": None,
-            "current_count": 0,
-            "count_board": {},
-            "last_counter": None
-        }
-        self.config.register_guild(**default_guild)
+        self.config = Config.get_conf(self, identifier=271828, force_registration=True)
+        self.config.register_guild(**self.default_guild)
 
-    @commands.mod_or_can_manage_channel()
-    @commands.hybrid_command()
-    async def setcounting(self, ctx, channel: discord.TextChannel):
-        """Set a counting channel for the game to began!"""
-        await self.config.guild(ctx.guild).counting_channel.set(channel.id)
-        await ctx.send(f"Counting channel has been set to {channel.mention}")
+    @commands.command()
+    async def countingsetchannel(self, ctx, channel: discord.TextChannel = None):
+        """Sets the channel for the counting game. If no channel is provided, a new one is created."""
+        guild = ctx.guild
 
-    @commands.hybrid_command()
-    async def currentcount(self, ctx):
-        """Display the current count"""
-        count = await self.config.guild(ctx.guild).current_count()
-        await ctx.send(f"The current count is {count}")
+        if channel is None:
+            channel = await guild.create_text_channel(name="counting-game")
+            await ctx.send(f"Counting game channel created: {channel.mention}. Please set the shame role (optional) using `countingsetshamerole`.")
+        else:
+            await ctx.send(f"Counting game channel set to {channel.mention}. Please set the shame role (optional) using `countingsetshamerole`.")
 
-    @commands.mod_or_can_manage_channel()
-    @commands.hybrid_command()
-    async def resetcountchannel(self, ctx):
-        """Reset the counting!"""
-        await self.config.guild(ctx.guild).counting_channel.set(None)
-        await ctx.send("Counting channel has been reset.")
+        await self.config.guild(ctx.guild).channel_id.set(channel.id)
+        await self.config.guild(ctx.guild).current_number.set(1)
+        await self.config.guild(ctx.guild).leaderboard.set({})
+        await self.config.guild(ctx.guild).last_counter_id.set(None)
 
-    @commands.hybrid_command()
-    async def countrules(self, ctx):
-        """Display the rules for counting."""
-        rules = ("1: A person can't count twice in a row\n"
-                 "2: The user for each number should alternate\n"
-                 "3: If a number is counted wrong the count will reset")
-        await ctx.send(rules)
+    @commands.command()
+    async def countingsetshamerole(self, ctx, shame_role: discord.Role):
+        """Sets the shame role for incorrect counting (optional)."""
+        await self.config.guild(ctx.guild).shame_role.set(shame_role.id)
+        await ctx.send(f"Shame role for counting set to {shame_role.mention}")
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """Handles messages in the counting game channel."""
         if message.author.bot:
             return
-        guild_data = self.config.guild(message.guild)
-        counting_channel = await guild_data.counting_channel()
-        if message.channel.id == counting_channel:
+
+        guild_config = await self.config.guild(message.guild).all()
+        if guild_config["channel_id"] == message.channel.id:
             try:
-                number = int(message.content)
-                current_count = await guild_data.current_count()
-                last_counter = await guild_data.last_counter()
-                if number != current_count + 1:
-                    try:
-                        await message.delete()
-                    except discord.Forbidden:
-                        await message.channel.send("I don't have permission to delete messages. Please make sure I have the 'Manage Messages' permission.")
-                        return
-                    await guild_data.current_count.set(0)
-                    embed = discord.Embed(title="Counting Game", description=f"You got the count wrong dummy! Counting restarted from 1", color=0x2b2d31)
-                    embed.set_image(url="https://media.tenor.com/4BRzlmo2FroAAAAC/kendeshi-anime-smh.gif")
-                    response = await message.channel.send(embed=embed)
-                elif message.author.id == last_counter:
-                    try:	
-                        await message.delete()	
-                    except discord.Forbidden:	
-                        await message.channel.send("I don't have permission to delete messages. Please make sure I have the 'Manage Messages' permission.")
-                        return
-                    embed2 = discord.Embed(title="Counting Game", description="You can't count twice!", color=0x2b2d31)
-                    embed2.set_image(url="https://i.pinimg.com/originals/63/c0/c6/63c0c6b632dfffd790b60a87007f1bfd.gif")
-                    response = await message.channel.send(embed=embed2)
-                    await response.delete(delay=5)
+                next_number = int(message.content)
+                last_counter_id = await self.config.guild(message.guild).last_counter_id()
+                if next_number == guild_config["current_number"] + 1 and message.author.id != last_counter_id:
+                    await self.config.guild(message.guild).current_number.set(next_number)
+                    await self.config.guild(message.guild).last_counter_id.set(message.author.id)
+                    await message.add_reaction(guild_config["correct_emote"])
+
+                    leaderboard = guild_config["leaderboard"]
+                    user_id = str(message.author.id)
+                    leaderboard[user_id] = leaderboard.get(user_id, 0) + 1
+                    await self.config.guild(message.guild).leaderboard.set(leaderboard)
                 else:
-                    await guild_data.current_count.set(number)
-                    await guild_data.last_counter.set(message.author.id)
-                    board = await guild_data.count_board()
-                    board[message.author.id] = board.get(message.author.id, 0) + 1
-                    await guild_data.count_board.set(board)
-                    await message.add_reaction("✅")
-                    
+                    await message.add_reaction(guild_config["wrong_emote"])
+
+                    if guild_config["shame_role"]:
+                        shame_role = message.guild.get_role(guild_config["shame_role"])
+                        await message.author.add_roles(shame_role, reason="Wrong count or double counting")
+                        await message.channel.set_permissions(shame_role, send_messages=False)
+
+                        display_name = message.author.display_name
+                        roasts = [
+                            f"{display_name} couldn't even count to {guild_config['current_number'] + 1}! Maybe try using your fingers next time?",
+                            f"Looks like {display_name} skipped a few math classes... Back to square one!",
+                            f"{display_name}, is that your final answer? Because it's definitely wrong!",
+                            f"{display_name}'s counting skills are as impressive as their ability to divide by zero.",
+                            f"{display_name}, are you sure you're not a calculator in disguise? Because your math is off!",
+                        ]
+                        roast = random.choice(roasts)
+                        await message.channel.send(embed=discord.Embed(description=roast, color=discord.Color.red()))
+
+                    await self.config.guild(message.guild).current_number.set(1)
+                    await self.config.guild(message.guild).last_counter_id.set(None)
+
             except ValueError:
-                await message.delete()
+                pass  # Ignore non-numeric messages
+
+    @commands.command()
+    async def currentnumber(self, ctx):
+        """Displays the current number in the counting game."""
+        current_number = await self.config.guild(ctx.guild).current_number()
+        await ctx.send(f"The current number is: {current_number}")
+
+    @commands.command(aliases=["countingboard", "countingleaderboard"])
+    async def countinglb(self, ctx):
+        """Displays the leaderboard in an embed."""
+        leaderboard = await self.config.guild(ctx.guild).leaderboard()
+        if leaderboard:
+            sorted_leaderboard = sorted(leaderboard.items(), key=lambda item: item[1], reverse=True)
+            embed = discord.Embed(title="Counting Game Leaderboard", color=discord.Color.blue())
+            for user_id, score in sorted_leaderboard[:10]:  # Show top 10
+                user = self.bot.get_user(int(user_id))
+                embed.add_field(name=user.name, value=score, inline=False)
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send("The leaderboard is empty.")
