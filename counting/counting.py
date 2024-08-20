@@ -47,7 +47,7 @@ class Counting(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         """Handles messages in the counting game channel."""
-        if message.author.bot:
+        if message.author.bot or message.guild is None:
             return
 
         guild_config = await self.config.guild(message.guild).all()
